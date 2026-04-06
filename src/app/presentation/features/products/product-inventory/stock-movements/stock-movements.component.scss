@@ -1,0 +1,212 @@
+// Stock Movements Component Styles
+.stock-movements {
+  
+  // Table Styles
+  .movements-table {
+    @apply bg-white border border-slate-200 rounded-lg overflow-hidden;
+    
+    th {
+      @apply bg-slate-50 px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider;
+      
+      
+    }
+    
+    td {
+      @apply px-6 py-4 whitespace-nowrap text-sm;
+      
+      
+    }
+    
+    tr {
+      &:hover {
+        @apply bg-slate-50 transition-colors;
+      }
+    }
+  }
+  
+  // Movement Type Tags
+  .movement-type-tag {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border;
+    
+    &.purchase {
+      @apply bg-green-100 text-green-800 border-green-200;
+    }
+    
+    &.sale {
+      @apply bg-blue-100 text-blue-800 border-blue-200;
+    }
+    
+    &.adjustment {
+      @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+    }
+    
+    &.transfer-in {
+      @apply bg-purple-100 text-purple-800 border-purple-200;
+    }
+    
+    &.transfer-out {
+      @apply bg-orange-100 text-orange-800 border-orange-200;
+    }
+    
+    &.return {
+      @apply bg-teal-100 text-teal-800 border-teal-200;
+    }
+    
+    &.damaged {
+      @apply bg-red-100 text-red-800 border-red-200;
+    }
+    
+    &.expired {
+      @apply bg-gray-100 text-gray-800 border-gray-200;
+    }
+  }
+  
+  // Quantity Display
+  .quantity-display {
+    &.positive {
+      @apply text-green-600 font-semibold;
+    }
+    
+    &.negative {
+      @apply text-red-600 font-semibold;
+    }
+    
+    &.neutral {
+      @apply text-slate-600;
+    }
+  }
+  
+  // Mobile Card Layout
+  .movement-card {
+    @apply p-4 hover:bg-slate-50 transition-colors;
+    
+    .card-header {
+      @apply flex items-center justify-between mb-3;
+    }
+    
+    .card-details {
+      @apply space-y-2 text-sm;
+      
+      .detail-item {
+        @apply flex items-center text-slate-600;
+        
+        .material-icons {
+          @apply text-sm mr-2;
+        }
+      }
+    }
+  }
+  
+  // Pagination Styles
+  .pagination {
+    @apply bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between;
+    
+    .page-info {
+      @apply text-sm text-slate-600;
+    }
+    
+    .page-nav {
+      @apply flex items-center gap-1;
+      
+      .page-button {
+        @apply min-w-[2.5rem] h-9 flex items-center justify-center text-sm font-medium border border-slate-300 rounded-md transition-colors;
+        @apply hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+        
+        &.active {
+          @apply bg-blue-600 text-white;
+        }
+        
+        &:not(.active) {
+          @apply bg-white text-slate-700;
+        }
+        
+        &:disabled {
+          @apply opacity-50 cursor-not-allowed;
+        }
+      }
+      
+      .nav-button {
+        @apply inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-slate-700 border border-slate-300 rounded-md transition-colors;
+        @apply bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+        
+        &:disabled {
+          @apply opacity-50 cursor-not-allowed;
+        }
+      }
+    }
+  }
+  
+  // Reference Tag
+  .reference-tag {
+    @apply inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded text-xs font-mono;
+  }
+  
+  // Loading and Empty States
+  .loading-state {
+    @apply flex items-center justify-center py-8;
+    
+    .spinner {
+      @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+    }
+  }
+  
+  .empty-state {
+    @apply text-center py-12 bg-slate-50 rounded-lg border border-slate-200;
+    
+    .empty-icon {
+      @apply text-4xl text-slate-400 mb-4 block;
+    }
+    
+    .empty-title {
+      @apply text-lg font-medium text-slate-900 mb-2;
+    }
+    
+    .empty-description {
+      @apply text-slate-600;
+    }
+  }
+  
+  // Error State
+  .error-state {
+    @apply bg-red-50 border border-red-200 rounded-lg p-4 mb-6;
+    
+    .error-content {
+      @apply flex items-center;
+      
+      .error-icon {
+        @apply text-red-400 mr-3;
+      }
+      
+      .error-title {
+        @apply text-sm font-medium text-red-800;
+      }
+      
+      .error-message {
+        @apply mt-1 text-sm text-red-700;
+      }
+      
+      .error-retry {
+        @apply mt-2 text-sm text-red-700 hover:text-red-900 underline;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1023px) {
+  .stock-movements {
+    .movements-table {
+      .desktop-table {
+        @apply hidden;
+      }
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .stock-movements {
+    .mobile-cards {
+      @apply hidden;
+    }
+  }
+}

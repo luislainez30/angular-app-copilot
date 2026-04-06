@@ -1,0 +1,411 @@
+<!-- Page Title with Navigation -->
+<div class="min-h-screen bg-slate-50">
+  <app-page-title 
+    [title]="'Inventory Management'"
+    [subtitle]="product ? 'Manage inventory levels and stock movements for ' + product.name : 'Loading...'">
+    
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-3">
+      <button
+        (click)="viewProduct()"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors"
+      >
+        <span class="material-icons text-sm">open_in_new</span>
+        View Product
+      </button>
+      <button
+        (click)="goBack()"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors"
+      >
+        <span class="material-icons text-sm">arrow_back</span>
+        Back to Products
+      </button>
+    </div>
+  </app-page-title>
+
+  <!-- Content Area -->
+  <div class="max-w-screen-2xl mx-auto py-6">
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="bg-white rounded-xl border border-slate-200 p-12 shadow-sm">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-slate-600">Loading inventory data...</span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <span class="material-icons text-red-400 mr-3">error</span>
+        <div>
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <div class="mt-1 text-sm text-red-700">{{ error }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!loading && !error" class="space-y-6">
+
+      <!-- Product Summary Card -->
+      <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex items-start justify-between">
+          <!-- Product Info -->
+          <div class="flex items-start space-x-4">
+            <div class="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
+              <span class="material-icons text-slate-400 text-2xl">inventory_2</span>
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-slate-900">{{ product?.name }}</h2>
+              <p class="text-slate-600 mb-2">{{ product?.shortDescription || product?.description }}</p>
+              <div class="flex items-center gap-4 text-sm text-slate-500">
+                <span><strong>SKU:</strong> {{ product?.sku }}</span>
+                <span><strong>Brand:</strong> {{ product?.brand || '—' }}</span>
+                <span><strong>Price:</strong> ${{ product?.price?.toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aggregate Inventory Summary -->
+          <div *ngIf="inventoryAggregate" class="text-right">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium"
+                 [class]="getStockStatusClasses(inventoryAggregate.stockStatus)">
+              <span class="material-icons text-xs">inventory</span>
+              {{ getStockStatusLabel(inventoryAggregate.stockStatus) }}
+            </div>
+            <div class="mt-3 space-y-1 text-sm">
+              <div class="text-slate-600">
+                <span class="font-medium text-slate-900">{{ inventoryAggregate.totalQuantityAvailable }}</span> 
+                Available
+              </div>
+              <div class="text-slate-600" *ngIf="inventoryAggregate.totalQuantityReserved > 0">
+                <span class="font-medium text-slate-900">{{ inventoryAggregate.totalQuantityReserved }}</span> 
+                Reserved
+              </div>
+              <div class="text-slate-600" *ngIf="inventoryAggregate.totalQuantityOnOrder > 0">
+                <span class="font-medium text-slate-900">{{ inventoryAggregate.totalQuantityOnOrder }}</span> 
+                On Order
+              </div>
+              <div *ngIf="inventoryAggregate.needsReorder" class="text-amber-600 font-medium">
+                <span class="material-icons text-xs mr-1">warning</span>
+                Needs Reorder
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <nav class="flex border-b border-slate-200">
+          <button
+            (click)="setActiveTab('overview')"
+            [class.bg-blue-50]="activeTab === 'overview'"
+            [class.text-blue-600]="activeTab === 'overview'"
+            [class.border-blue-500]="activeTab === 'overview'"
+            class="flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors"
+          >
+            <span class="material-icons text-sm">dashboard</span>
+            Overview
+          </button>
+          <button
+            (click)="setActiveTab('locations')"
+            [class.bg-blue-50]="activeTab === 'locations'"
+            [class.text-blue-600]="activeTab === 'locations'"
+            [class.border-blue-500]="activeTab === 'locations'"
+            class="flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors"
+          >
+            <span class="material-icons text-sm">location_on</span>
+            Locations
+          </button>
+          <button
+            (click)="setActiveTab('movements')"
+            [class.bg-blue-50]="activeTab === 'movements'"
+            [class.text-blue-600]="activeTab === 'movements'"
+            [class.border-blue-500]="activeTab === 'movements'"
+            class="flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors"
+          >
+            <span class="material-icons text-sm">swap_horiz</span>
+            Movements
+          </button>
+          <button
+            (click)="setActiveTab('adjustments')"
+            [class.bg-blue-50]="activeTab === 'adjustments'"
+            [class.text-blue-600]="activeTab === 'adjustments'"
+            [class.border-blue-500]="activeTab === 'adjustments'"
+            class="flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors"
+          >
+            <span class="material-icons text-sm">tune</span>
+            Adjustments
+          </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+
+          <!-- Overview Tab -->
+          <div *ngIf="isActiveTab('overview')" class="space-y-6">
+            
+            <!-- Location Selector -->
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-200">
+              <label for="location-select" class="text-sm font-medium text-slate-700">
+                Manage inventory for:
+              </label>
+              <select
+                id="location-select"
+                [(ngModel)]="selectedLocationId"
+                (ngModelChange)="onLocationChange($event)"
+                class="block w-64 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              >
+                <option value="" disabled>Select a location</option>
+                <option *ngFor="let location of availableLocations" [value]="location.id">
+                  {{ location.name }} ({{ location.code }})
+                </option>
+              </select>
+            </div>
+
+            <!-- Inventory Form -->
+            <div *ngIf="selectedLocationId">
+              
+              <!-- Current Inventory Data Display -->
+              <div *ngIf="!isEditingInventory && currentInventoryRecord" class="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h4 class="text-sm font-semibold text-slate-900 mb-3">Current Inventory Status</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span class="text-slate-600">Available:</span>
+                        <span class="font-semibold text-slate-900 ml-2">{{ currentInventoryRecord.quantityAvailable }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-600">Reserved:</span>
+                        <span class="font-semibold text-slate-900 ml-2">{{ currentInventoryRecord.quantityReserved }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-600">On Order:</span>
+                        <span class="font-semibold text-slate-900 ml-2">{{ currentInventoryRecord.quantityOnOrder }}</span>
+                      </div>
+                      <div>
+                        <span class="text-slate-600">Cost/Unit:</span>
+                        <span class="font-semibold text-slate-900 ml-2">${{ currentInventoryRecord.costPerUnit.toFixed(2) }}</span>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                      <div>
+                        <span class="text-slate-600">Reorder Level:</span>
+                        <span class="font-semibold text-slate-900 ml-2">{{ currentInventoryRecord.reorderLevel }}</span>
+                      </div>
+                      <div *ngIf="currentInventoryRecord.maxStockLevel">
+                        <span class="text-slate-600">Max Stock:</span>
+                        <span class="font-semibold text-slate-900 ml-2">{{ currentInventoryRecord.maxStockLevel }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    (click)="startEditing()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                  >
+                    <span class="material-icons text-sm">edit</span>
+                    Edit Inventory
+                  </button>
+                </div>
+              </div>
+
+              <!-- New Location Notice -->
+              <div *ngIf="!isEditingInventory && !currentInventoryRecord" class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex items-start justify-between">
+                  <div class="flex">
+                    <span class="material-icons text-blue-600 mr-3">info</span>
+                    <div>
+                      <h4 class="text-sm font-semibold text-blue-900">No inventory record found</h4>
+                      <p class="text-sm text-blue-700 mt-1">This product doesn't have an inventory record for this location yet. Click 'Create Inventory' to set it up.</p>
+                    </div>
+                  </div>
+                  <button
+                    (click)="startEditing()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                  >
+                    <span class="material-icons text-sm">add</span>
+                    Create Inventory
+                  </button>
+                </div>
+              </div>
+
+              <!-- Inventory Form -->
+              <div *ngIf="isEditingInventory" [formGroup]="inventoryForm">
+              <!-- Error Display -->
+              <div *ngIf="inventoryError" class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <span class="material-icons text-red-400 mr-3">error</span>
+                  <span class="text-sm text-red-700">{{ inventoryError }}</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left Column - Quantities -->
+                <div class="space-y-4">
+                  <h3 class="text-lg font-semibold text-slate-900 mb-4">Stock Levels</h3>
+                  
+                  <!-- Available Quantity -->
+                  <div>
+                    <label for="quantityAvailable" class="block text-sm font-medium text-slate-700 mb-2">
+                      Available Quantity *
+                    </label>
+                    <input
+                      id="quantityAvailable"
+                      type="number"
+                      formControlName="quantityAvailable"
+                      min="0"
+                      step="1"
+                      class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      [class.border-red-300]="hasError(inventoryForm, 'quantityAvailable')"
+                      [class.focus:ring-red-500]="hasError(inventoryForm, 'quantityAvailable')"
+                    />
+                    <p *ngIf="hasError(inventoryForm, 'quantityAvailable')" class="mt-1 text-sm text-red-600">
+                      {{ getFieldError(inventoryForm, 'quantityAvailable') }}
+                    </p>
+                  </div>
+
+                  <!-- Reserved Quantity -->
+                  <div>
+                    <label for="quantityReserved" class="block text-sm font-medium text-slate-700 mb-2">
+                      Reserved Quantity
+                    </label>
+                    <input
+                      id="quantityReserved"
+                      type="number"
+                      formControlName="quantityReserved"
+                      min="0"
+                      step="1"
+                      class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <!-- On Order Quantity -->
+                  <div>
+                    <label for="quantityOnOrder" class="block text-sm font-medium text-slate-700 mb-2">
+                      On Order Quantity
+                    </label>
+                    <input
+                      id="quantityOnOrder"
+                      type="number"
+                      formControlName="quantityOnOrder"
+                      min="0"
+                      step="1"
+                      class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <!-- Right Column - Levels & Cost -->
+                <div class="space-y-4">
+                  <h3 class="text-lg font-semibold text-slate-900 mb-4">Inventory Settings</h3>
+                  
+                  <!-- Reorder Level -->
+                  <div>
+                    <label for="reorderLevel" class="block text-sm font-medium text-slate-700 mb-2">
+                      Reorder Level *
+                    </label>
+                    <input
+                      id="reorderLevel"
+                      type="number"
+                      formControlName="reorderLevel"
+                      min="0"
+                      step="1"
+                      class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      [class.border-red-300]="hasError(inventoryForm, 'reorderLevel')"
+                      [class.focus:ring-red-500]="hasError(inventoryForm, 'reorderLevel')"
+                    />
+                    <p *ngIf="hasError(inventoryForm, 'reorderLevel')" class="mt-1 text-sm text-red-600">
+                      {{ getFieldError(inventoryForm, 'reorderLevel') }}
+                    </p>
+                  </div>
+
+                  <!-- Max Stock Level -->
+                  <div>
+                    <label for="maxStockLevel" class="block text-sm font-medium text-slate-700 mb-2">
+                      Maximum Stock Level
+                    </label>
+                    <input
+                      id="maxStockLevel"
+                      type="number"
+                      formControlName="maxStockLevel"
+                      min="0"
+                      step="1"
+                      class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <!-- Cost Per Unit -->
+                  <div>
+                    <label for="costPerUnit" class="block text-sm font-medium text-slate-700 mb-2">
+                      Cost Per Unit *
+                    </label>
+                    <div class="relative">
+                      <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                      <input
+                        id="costPerUnit"
+                        type="number"
+                        formControlName="costPerUnit"
+                        min="0.01"
+                        step="0.01"
+                        class="block w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        [class.border-red-300]="hasError(inventoryForm, 'costPerUnit')"
+                        [class.focus:ring-red-500]="hasError(inventoryForm, 'costPerUnit')"
+                      />
+                    </div>
+                    <p *ngIf="hasError(inventoryForm, 'costPerUnit')" class="mt-1 text-sm text-red-600">
+                      {{ getFieldError(inventoryForm, 'costPerUnit') }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="flex justify-between items-center pt-6 border-t border-slate-200 mt-6">
+                <button
+                  type="button"
+                  (click)="cancelEditing()"
+                  class="inline-flex items-center gap-2 px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-all"
+                >
+                  <span class="material-icons text-sm">close</span>
+                  Cancel
+                </button>
+                
+                <button
+                  type="button"
+                  (click)="saveInventory()"
+                  [disabled]="!inventoryForm.valid"
+                  class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <span *ngIf="savingInventory" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                  <span class="material-icons text-sm" *ngIf="!savingInventory">save</span>
+                  {{ savingInventory ? 'Saving...' : (currentInventoryRecord ? 'Update Inventory' : 'Create Inventory') }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Select Location Message -->
+            <div *ngIf="!selectedLocationId && availableLocations.length > 0" 
+                 class="text-center py-8 text-slate-500">
+              <span class="material-icons text-4xl mb-2 block">location_off</span>
+              <p>Please select a location to manage inventory.</p>
+            </div>
+          </div>
+        </div>
+        <!-- Locations Tab -->
+        <div *ngIf="isActiveTab('locations')">
+          <app-manage-inventory-location></app-manage-inventory-location>
+        </div>
+
+        <!-- Movements Tab -->
+        <div *ngIf="isActiveTab('movements')">
+          <app-stock-movements [productId]="productId"></app-stock-movements>
+        </div>
+
+        <!-- Adjustments Tab -->
+        <div *ngIf="isActiveTab('adjustments')">
+          <app-manage-inventory-adjustments [productId]="productId"></app-manage-inventory-adjustments>
+        </div>

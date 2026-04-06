@@ -1,0 +1,39 @@
+// Customer List Component Styles
+
+// Custom table styles if needed
+.customer-table {
+  // Additional styles can be added here if needed
+}
+
+// Custom status badge styles (if not using Tailwind)
+.status-badge {
+  &.status-active {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  &.status-inactive {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  &.status-suspended {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  &.status-pending {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  &.status-blocked {
+    @apply bg-red-900 text-red-100;
+  }
+}
+
+// Custom loading animation if needed
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

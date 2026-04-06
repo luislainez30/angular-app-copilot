@@ -1,0 +1,217 @@
+<div class="product-form-container">
+  <div class="">
+    <app-page-title 
+      [title]="isEditMode ? 'Edit Product' : 'Create Product'" 
+      >
+    </app-page-title>
+  </div>
+
+  <div class="product-form-content">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+      <!-- Form Sections -->
+      <div 
+        *ngFor="let section of formConfig.sections; trackBy: trackBySection" 
+        class="form-section">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+          <h3 [ngClass]="getSectionTitleClasses()">{{ section.title }}</h3>
+          <p 
+            *ngIf="section.description" 
+            [ngClass]="getSectionDescriptionClasses()">
+            {{ section.description }}
+          </p>
+        </div>
+
+        <!-- Section Fields -->
+        <div class="section-fields">
+          <div 
+            *ngFor="let field of section.fields; trackBy: trackByField"
+            [ngClass]="'field-container ' + getFieldColumnSpan(field)">
+            
+            <!-- Field Label -->
+            <label 
+              [for]="field.key" 
+              [ngClass]="getLabelClasses()">
+              {{ field.label }}
+              <span 
+                *ngIf="field.required" 
+                [ngClass]="getRequiredIndicatorClasses()">*</span>
+            </label>
+
+            <!-- Text Input Fields -->
+            <input 
+              *ngIf="isTextInput(field.type)"
+              [type]="getInputType(field.type)"
+              [id]="field.key"
+              [formControlName]="field.key"
+              [placeholder]="field.placeholder || ''"
+              [ngClass]="getInputClasses(field.key)"
+              [min]="field.min"
+              [max]="field.max"
+              [step]="field.step">
+
+            <!-- Number Input Fields -->
+            <div *ngIf="isNumberInput(field.type)" class="number-input-container">
+              <input 
+                type="number"
+                [id]="field.key"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder || ''"
+                [ngClass]="getInputClasses(field.key)"
+                [step]="field.step">
+              <span *ngIf="field.suffix" class="input-suffix">{{ field.suffix }}</span>
+            </div>
+
+            <!-- Textarea Fields -->
+            <textarea 
+              *ngIf="isTextareaInput(field.type)"
+              [id]="field.key"
+              [formControlName]="field.key"
+              [placeholder]="field.placeholder || ''"
+              [ngClass]="getTextareaClasses(field.key)"
+              [rows]="field.type === ProductFormFieldType.TAGS ? 2 : 4">
+            </textarea>
+
+            <!-- Select Fields -->
+            <select 
+              *ngIf="isSelectInput(field.type)"
+              [id]="field.key"
+              [formControlName]="field.key"
+              [ngClass]="getSelectClasses(field.key)">
+              <option value="" disabled>{{ field.placeholder || 'Select an option' }}</option>
+              <option 
+                *ngFor="let option of field.options; trackBy: trackByOption"
+                [value]="option.value"
+                [disabled]="option.disabled">
+                {{ option.label }}
+              </option>
+            </select>
+
+            <!-- Radio Fields -->
+            <div *ngIf="isRadioInput(field.type)" class="radio-group">
+              <div 
+                *ngFor="let option of field.options; trackBy: trackByOption"
+                class="radio-option">
+                <input 
+                  type="radio"
+                  [id]="field.key + '_' + option.value"
+                  [formControlName]="field.key"
+                  [value]="option.value"
+                  [ngClass]="getRadioClasses(field.key)">
+                <label 
+                  [for]="field.key + '_' + option.value"
+                  class="radio-label">
+                  {{ option.label }}
+                </label>
+              </div>
+            </div>
+
+            <!-- Checkbox Fields -->
+            <div *ngIf="isCheckboxInput(field.type)" class="checkbox-container">
+              <input 
+                type="checkbox"
+                [id]="field.key"
+                [formControlName]="field.key"
+                [ngClass]="getCheckboxClasses(field.key)">
+              <label 
+                [for]="field.key" 
+                class="checkbox-label">
+                {{ field.hint || field.label }}
+              </label>
+            </div>
+
+            <!-- Field Hint -->
+            <p 
+              *ngIf="field.hint && !isCheckboxInput(field.type)" 
+              [ngClass]="getHintClasses()">
+              {{ field.hint }}
+            </p>
+
+            <!-- Field Errors -->
+            <div 
+              *ngIf="isFieldInvalid(field.key)" 
+              [ngClass]="getErrorClasses()">
+              <p *ngFor="let error of getFieldErrorMessages(field.key)">
+                {{ error }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          routerLink="/products"
+          class="cancel-button">
+          {{ formConfig.cancelLabel }}
+        </button>
+        
+        <button
+          type="submit"
+          [disabled]="!canSubmit()"
+          [ngClass]="getSubmitButtonClasses()"
+          [attr.aria-label]="isSubmitting ? 'Saving product...' : formConfig.submitLabel">
+          <span *ngIf="isSubmitting" class="loading-spinner" aria-hidden="true"></span>
+          <span class="button-text">
+            {{ isSubmitting ? 'Saving product...' : formConfig.submitLabel }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Form Status Indicator -->
+      <div *ngIf="!productForm.valid && productForm.touched" class="form-status-warning">
+        <div class="flex items-center gap-2 text-amber-600 text-sm">
+          <span class="material-icons text-lg">warning</span>
+          <span>Please correct the errors above before submitting.</span>
+        </div>
+      </div>
+    </form>
+
+    <!-- Enhanced Debug Information (Development Only) -->
+    <div *ngIf="showDebugInfo" class="debug-info">
+      <h3>Debug Information</h3>
+      <div class="debug-content">
+        <h4>Form Status</h4>
+        <div class="debug-status">
+          <p><strong>Valid:</strong> {{ productForm.valid }}</p>
+          <p><strong>Can Submit:</strong> {{ canSubmit() }}</p>
+          <p><strong>Is Submitting:</strong> {{ isSubmitting }}</p>
+        </div>
+        
+        <h4>Validation Summary</h4>
+        <div class="validation-summary">
+          <p><strong>Total Errors:</strong> {{ getFormValidationSummary().errors.length }}</p>
+          <ul *ngIf="getFormValidationSummary().errors.length > 0" class="error-list">
+            <li *ngFor="let error of getFormValidationSummary().errors" class="text-red-600 text-xs">
+              {{ error }}
+            </li>
+          </ul>
+        </div>
+
+        <h4>Form Value</h4>
+        <pre class="form-value">{{ productForm.value | json }}</pre>
+        
+        <h4>Field Status Details</h4>
+        <div class="field-status-grid">
+          <div *ngFor="let section of formConfig.sections" class="section-debug">
+            <h5>{{ section.title }}</h5>
+            <div *ngFor="let field of section.fields" class="field-debug">
+              <strong>{{ field.key }}:</strong>
+              <span [ngClass]="{'text-green-600': productForm.get(field.key)?.valid, 'text-red-600': productForm.get(field.key)?.invalid}">
+                {{ productForm.get(field.key)?.valid ? '✓' : '✗' }}
+              </span>
+              Touched: {{ productForm.get(field.key)?.touched ? '✓' : '✗' }},
+              Dirty: {{ productForm.get(field.key)?.dirty ? '✓' : '✗' }}
+              <div *ngIf="productForm.get(field.key)?.errors" class="field-errors">
+                Errors: {{ productForm.get(field.key)?.errors | json }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

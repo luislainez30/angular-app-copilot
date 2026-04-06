@@ -1,0 +1,198 @@
+<div class="min-h-screen bg-slate-50">
+      <!-- Page Header -->
+      <app-page-title 
+        [title]="isEditMode ? 'Edit Customer' : 'Add New Customer'"
+        [subtitle]="isEditMode ? 'Update customer information' : 'Create a new customer account'">
+        
+        <!-- Back Button -->
+        <button 
+          type="button"
+          routerLink="/customers"
+          class="inline-flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors">
+          <span class="material-icons text-sm">arrow_back</span>
+          Back to List
+        </button>
+      </app-page-title>
+
+      <!-- Form Container -->
+      <div class="max-w-4xl mx-auto px-4 py-6">
+        <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" novalidate>
+          
+          <!-- Form Sections -->
+          <div class="space-y-8">
+            <div 
+              *ngFor="let section of formConfig.sections; trackBy: trackBySection"
+              class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+              
+              <!-- Section Header -->
+              <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <h3 class="text-lg font-medium text-slate-900">{{ section.title }}</h3>
+                <p *ngIf="section.description" class="mt-1 text-sm text-slate-600">
+                  {{ section.description }}
+                </p>
+              </div>
+
+              <!-- Section Fields -->
+              <div class="px-6 py-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div 
+                    *ngFor="let field of section.fields; trackBy: trackByField"
+                    [ngClass]="getFieldColumnSpan(field)">
+                    
+                    <!-- Field Label -->
+                    <label [for]="field.key" class="block text-sm font-medium text-slate-700 mb-2">
+                      {{ field.label }}
+                      <span *ngIf="field.required" class="text-red-500 ml-1">*</span>
+                    </label>
+
+                    <!-- Text Input -->
+                    <input
+                      *ngIf="isTextInput(field.type)"
+                      [id]="field.key"
+                      [type]="getInputType(field.type)"
+                      [formControlName]="field.key"
+                      [placeholder]="field.placeholder || ''"
+                      [class]="getInputClasses(field.key)"
+                    />
+
+                    <!-- Select Input -->
+                    <select
+                      *ngIf="field.type === FormFieldType.SELECT"
+                      [id]="field.key"
+                      [formControlName]="field.key"
+                      [class]="getInputClasses(field.key)">
+                      <option value="" disabled>{{ field.placeholder || 'Select an option' }}</option>
+                      <option 
+                        *ngFor="let option of field.options; trackBy: trackByOption" 
+                        [value]="option.value" 
+                        [disabled]="option.disabled">
+                        {{ option.label }}
+                      </option>
+                    </select>
+
+                    <!-- Radio Group -->
+                    <div *ngIf="field.type === FormFieldType.RADIO" class="space-y-3">
+                      <div 
+                        *ngFor="let option of field.options; trackBy: trackByOption"
+                        class="flex items-center">
+                        <input
+                          [id]="field.key + '_' + option.value"
+                          type="radio"
+                          [name]="field.key"
+                          [value]="option.value"
+                          [formControlName]="field.key"
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300"
+                        />
+                        <label 
+                          [for]="field.key + '_' + option.value" 
+                          class="ml-3 block text-sm text-slate-700">
+                          {{ option.label }}
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Checkbox -->
+                    <div *ngIf="field.type === FormFieldType.CHECKBOX" class="flex items-center">
+                      <input
+                        [id]="field.key"
+                        type="checkbox"
+                        [formControlName]="field.key"
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                      />
+                      <label [for]="field.key" class="ml-3 block text-sm text-slate-700">
+                        {{ field.label }}
+                      </label>
+                    </div>
+
+                    <!-- Textarea -->
+                    <textarea
+                      *ngIf="field.type === FormFieldType.TEXTAREA"
+                      [id]="field.key"
+                      [formControlName]="field.key"
+                      [placeholder]="field.placeholder || ''"
+                      rows="3"
+                      [class]="getInputClasses(field.key)">
+                    </textarea>
+
+                    <!-- Field Hint -->
+                    <p *ngIf="field.hint" class="mt-2 text-xs text-slate-500">
+                      {{ field.hint }}
+                    </p>
+
+                    <!-- Field Validation Errors -->
+                    <div 
+                      *ngIf="isFieldInvalid(field.key)" 
+                      class="mt-2 space-y-1">
+                      <p 
+                        *ngFor="let error of getFieldErrorMessages(field.key)" 
+                        class="text-xs text-red-600 flex items-center gap-1">
+                        <span class="material-icons text-xs">error</span>
+                        {{ error }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="mt-8 bg-white rounded-lg border border-slate-200 px-6 py-4">
+            <div class="flex justify-between items-center">
+              <!-- Form Status -->
+              <div class="flex items-center gap-3">
+                <div *ngIf="customerForm.pending" class="flex items-center gap-2 text-blue-600">
+                  <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span class="text-sm">Validating...</span>
+                </div>
+                <div *ngIf="customerForm.invalid && customerForm.dirty" class="flex items-center gap-2 text-red-600">
+                  <span class="material-icons text-sm">error</span>
+                  <span class="text-sm">Please fix the errors above</span>
+                </div>
+                <div *ngIf="customerForm.valid && customerForm.dirty" class="flex items-center gap-2 text-green-600">
+                  <span class="material-icons text-sm">check_circle</span>
+                  <span class="text-sm">Form is valid</span>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  routerLink="/customers"
+                  class="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                  {{ formConfig.cancelLabel }}
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="customerForm.invalid || isSubmitting"
+                  [class]="getSubmitButtonClasses()">
+                  <span *ngIf="isSubmitting" class="flex items-center gap-2">
+                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    {{ isEditMode ? 'Updating...' : 'Creating...' }}
+                  </span>
+                  <span *ngIf="!isSubmitting" class="flex items-center gap-2">
+                    <span class="material-icons text-sm">
+                      {{ isEditMode ? 'save' : 'add' }}
+                    </span>
+                    {{ formConfig.submitLabel }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Debug Info (Development Only) -->
+          <div *ngIf="showDebugInfo" class="mt-8 bg-slate-100 rounded-lg p-4">
+            <h4 class="font-medium text-slate-900 mb-2">Debug Information</h4>
+            <div class="space-y-2 text-sm">
+              <div><strong>Form Valid:</strong> {{ customerForm.valid }}</div>
+              <div><strong>Form Touched:</strong> {{ customerForm.touched }}</div>
+              <div><strong>Form Dirty:</strong> {{ customerForm.dirty }}</div>
+              <div><strong>Is Edit Mode:</strong> {{ isEditMode }}</div>
+              <div><strong>Customer ID:</strong> {{ customerId || 'N/A' }}</div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>

@@ -1,0 +1,24 @@
+// Product List Component Styles
+// Mostly using Tailwind utility classes, minimal custom styles
+
+.product-status {
+  &.active {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  &.inactive {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  &.discontinued {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  &.draft {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  &.out-of-stock {
+    @apply bg-orange-100 text-orange-800;
+  }
+}

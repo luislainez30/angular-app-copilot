@@ -1,0 +1,205 @@
+/* Product Form Component Styles */
+.product-form-container {
+  @apply min-h-screen bg-slate-50;
+}
+
+.product-form-header {
+  @apply bg-white shadow-sm border-b border-slate-200 px-6 py-4;
+}
+
+.product-form-content {
+  @apply max-w-screen-2xl mx-auto px-6 py-8;
+}
+
+.product-form {
+  @apply bg-white rounded-lg shadow-sm border border-slate-200 p-8 space-y-8;
+}
+
+/* Form Section Styles */
+.form-section {
+  @apply border-b border-slate-200 pb-8 last:border-b-0;
+}
+
+.section-header {
+  @apply mb-6;
+}
+
+.section-fields {
+  @apply grid grid-cols-2 md:grid-cols-3 gap-6;
+}
+
+.field-container {
+  @apply space-y-2;
+}
+
+/* Input Field Styles */
+.number-input-container {
+  @apply relative;
+}
+
+.input-suffix {
+  @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-slate-500 pointer-events-none;
+}
+
+/* Radio Group Styles */
+.radio-group {
+  @apply space-y-3;
+}
+
+.radio-option {
+  @apply flex items-center space-x-3;
+}
+
+.radio-label {
+  @apply text-sm text-slate-700 cursor-pointer;
+}
+
+/* Checkbox Styles */
+.checkbox-container {
+  @apply flex items-start space-x-3;
+}
+
+.checkbox-label {
+  @apply text-sm text-slate-700 cursor-pointer leading-5;
+}
+
+/* Form Actions Styles */
+.form-actions {
+  @apply flex flex-col sm:flex-row sm:justify-end sm:space-x-4 space-y-4 sm:space-y-0 pt-6;
+}
+
+.cancel-button {
+  @apply px-6 py-2 text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors font-medium;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  @apply inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2;
+}
+
+/* Debug Information (Development Only) */
+.debug-info {
+  @apply mt-8 bg-slate-100 rounded-lg p-6 border border-slate-300;
+}
+
+.debug-content {
+  @apply space-y-4;
+}
+
+.debug-info h3 {
+  @apply text-lg font-semibold text-slate-800 mb-4;
+}
+
+.debug-info h4 {
+  @apply text-sm font-medium text-slate-700 mb-2;
+}
+
+.debug-info pre {
+  @apply bg-white p-3 rounded border text-xs overflow-auto;
+}
+
+/* Field Error Animation */
+.field-container {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Focus States */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-0;
+}
+
+/* Validation States */
+.field-error {
+  @apply border-red-300 bg-red-50;
+}
+
+.field-valid {
+  @apply border-green-300 bg-green-50;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-form-content {
+    @apply px-4 py-6;
+  }
+  
+  .product-form {
+    @apply p-6 space-y-6;
+  }
+  
+  .section-fields {
+    @apply grid-cols-1 gap-4;
+  }
+  
+  .form-actions {
+    @apply flex-col space-y-3;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .form-actions,
+  .debug-info {
+    @apply hidden;
+  }
+  
+  .product-form-container {
+    @apply bg-white shadow-none;
+  }
+  
+  .product-form {
+    @apply shadow-none border-none;
+  }
+}
+
+/* Enhanced Form Status and Debug Styles */
+.form-status-warning {
+  @apply mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md;
+}
+
+.button-text {
+  @apply inline-block;
+}
+
+/* Enhanced Debug Information Styles */
+.debug-status {
+  @apply bg-white p-3 rounded border space-y-1;
+}
+
+.debug-status p {
+  @apply text-sm;
+}
+
+.validation-summary {
+  @apply bg-white p-3 rounded border;
+}
+
+.error-list {
+  @apply mt-2 space-y-1;
+}
+
+.form-value {
+  @apply bg-white p-3 rounded border text-xs overflow-auto max-h-48;
+}
+
+.field-status-grid {
+  @apply bg-white p-3 rounded border max-h-96 overflow-auto;
+}
+
+.section-debug {
+  @apply mb-4 pb-2 border-b border-slate-200 last:border-b-0;
+}
+
+.field-debug {
+  @apply text-xs py-1 border-b border-slate-100 last:border-b-0;
+}
+
+.field-errors {
+  @apply ml-4 mt-1 text-xs text-red-600 bg-red-50 p-1 rounded;
+}
+
+.debug-info h5 {
+  @apply text-xs font-medium text-slate-600 mb-1 mt-3;
+}

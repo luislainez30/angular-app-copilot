@@ -1,0 +1,1 @@
+export { ManageInventoryAdjustmentsComponent } from './manage-inventory-adjustments.component';

@@ -1,0 +1,397 @@
+// Manage Inventory Adjustments Component Styles
+.manage-inventory-adjustments {
+  
+  // Form Styles
+  .adjustment-form {
+    @apply bg-white rounded-lg border border-slate-200 p-6 shadow-sm;
+    
+    .form-header {
+      @apply flex items-center justify-between mb-6;
+      
+      .form-title {
+        h4 {
+          @apply text-lg font-semibold text-slate-900;
+        }
+        
+        p {
+          @apply text-sm text-slate-600 mt-1;
+        }
+      }
+      
+      .close-button {
+        @apply text-slate-400 hover:text-slate-600 transition-colors;
+        
+        .material-icons {
+          @apply text-xl;
+        }
+      }
+    }
+    
+    .form-content {
+      .form-grid {
+        @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+      }
+      
+      .form-field {
+        @apply space-y-2;
+        
+        label {
+          @apply block text-sm font-medium text-slate-700;
+          
+          .required {
+            @apply text-red-500;
+          }
+        }
+        
+        input, select, textarea {
+          @apply block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm transition-colors;
+          @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+          
+          &.error {
+            @apply border-red-300;
+            
+            &:focus {
+              @apply ring-red-500 border-red-500;
+            }
+          }
+          
+          &:disabled {
+            @apply bg-slate-50 text-slate-500 cursor-not-allowed;
+          }
+        }
+        
+        .error-message {
+          @apply mt-1 text-sm text-red-600;
+        }
+        
+        .help-text {
+          @apply mt-1 text-xs text-slate-500;
+        }
+      }
+      
+      .currency-field {
+        .currency-symbol {
+          @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500;
+        }
+        
+        input {
+          @apply pl-8;
+        }
+      }
+      
+      .form-actions {
+        @apply flex items-center justify-between pt-6 border-t border-slate-200 mt-6;
+        
+        .cancel-button {
+          @apply inline-flex items-center gap-2 px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg;
+          @apply hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-all;
+        }
+        
+        .submit-button {
+          @apply inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-lg;
+          @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all;
+          
+          &:disabled {
+            @apply opacity-50 cursor-not-allowed;
+          }
+        }
+      }
+    }
+  }
+  
+  // Quantity Display Widget
+  .quantity-display {
+    @apply bg-slate-50 rounded-lg p-4 border border-slate-200;
+    
+    .quantity-grid {
+      @apply grid grid-cols-3 gap-4 text-sm;
+      
+      .quantity-item {
+        @apply text-center;
+        
+        .label {
+          @apply block text-slate-600 mb-1;
+        }
+        
+        .value {
+          @apply text-lg font-semibold;
+          
+          &.current {
+            @apply text-slate-900;
+          }
+          
+          &.positive {
+            @apply text-green-600;
+          }
+          
+          &.negative {
+            @apply text-red-600;
+          }
+          
+          &.neutral {
+            @apply text-slate-600;
+          }
+        }
+      }
+    }
+  }
+  
+  // Status Badges
+  .status-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border;
+    
+    &.pending {
+      @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+    }
+    
+    &.approved {
+      @apply bg-green-100 text-green-800 border-green-200;
+    }
+    
+    &.rejected {
+      @apply bg-red-100 text-red-800 border-red-200;
+    }
+  }
+  
+  // Adjustments List
+  .adjustments-list {
+    @apply bg-white rounded-lg border border-slate-200 overflow-hidden;
+    
+    .list-header {
+      @apply px-6 py-4 border-b border-slate-200 bg-slate-50;
+      
+      h4 {
+        @apply text-lg font-semibold text-slate-900;
+      }
+      
+      p {
+        @apply text-sm text-slate-600 mt-1;
+      }
+    }
+    
+    .adjustment-item {
+      @apply p-6 hover:bg-slate-50 transition-colors border-b border-slate-200 last:border-b-0;
+      
+      .adjustment-header {
+        @apply flex items-center gap-3 mb-3;
+        
+        .status-badge {
+          @apply flex-shrink-0;
+        }
+        
+        .date {
+          @apply text-sm text-slate-500;
+        }
+      }
+      
+      .adjustment-details {
+        @apply grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-3;
+        
+        .detail-item {
+          .label {
+            @apply text-slate-600;
+          }
+          
+          .value {
+            @apply font-medium text-slate-900 ml-2;
+          }
+        }
+      }
+      
+      .adjustment-notes {
+        @apply text-sm;
+        
+        .label {
+          @apply text-slate-600;
+        }
+        
+        .value {
+          @apply text-slate-900 ml-2;
+        }
+      }
+      
+      .adjustment-quantity {
+        @apply text-right;
+        
+        .quantity-change {
+          @apply text-lg font-semibold font-mono;
+          
+          &.positive {
+            @apply text-green-600;
+          }
+          
+          &.negative {
+            @apply text-red-600;
+          }
+        }
+        
+        .quantity-range {
+          @apply text-xs text-slate-500 mt-1;
+        }
+      }
+    }
+  }
+  
+  // Loading and Empty States
+  .loading-state {
+    @apply flex items-center justify-center py-8;
+    
+    .spinner {
+      @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+    }
+    
+    .loading-text {
+      @apply ml-3 text-slate-600;
+    }
+  }
+  
+  .empty-state {
+    @apply text-center py-12 text-slate-500;
+    
+    .empty-icon {
+      @apply text-4xl mb-4 block text-slate-400;
+    }
+    
+    .empty-title {
+      @apply text-lg font-medium text-slate-900 mb-2;
+    }
+    
+    .empty-description {
+      @apply text-slate-600;
+    }
+  }
+  
+  // Error State
+  .error-state {
+    @apply bg-red-50 border border-red-200 rounded-lg p-4;
+    
+    .error-content {
+      @apply flex items-center;
+      
+      .error-icon {
+        @apply text-red-400 mr-3;
+      }
+      
+      .error-details {
+        h3 {
+          @apply text-sm font-medium text-red-800;
+        }
+        
+        div {
+          @apply mt-1 text-sm text-red-700;
+        }
+      }
+    }
+  }
+  
+  // Action Buttons
+  .action-button {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    
+    &.primary {
+      @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+    }
+    
+    &.secondary {
+      @apply text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 focus:ring-slate-500;
+    }
+    
+    &.danger {
+      @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+    }
+    
+    .material-icons {
+      @apply text-sm;
+    }
+  }
+  
+  // Form Validation States
+  .form-field {
+    &.has-error {
+      input, select, textarea {
+        @apply border-red-300;
+        
+        &:focus {
+          @apply ring-red-500 border-red-500;
+        }
+      }
+    }
+    
+    &.has-success {
+      input, select, textarea {
+        @apply border-green-300;
+        
+        &:focus {
+          @apply ring-green-500 border-green-500;
+        }
+      }
+    }
+  }
+  
+  // Checkbox Styling
+  .checkbox-field {
+    input[type="checkbox"] {
+      @apply rounded border-slate-300 text-blue-600;
+      @apply focus:ring-blue-500 focus:ring-offset-0;
+    }
+    
+    label {
+      @apply inline-flex items-center cursor-pointer;
+      
+      span {
+        @apply ml-3 text-sm text-slate-700;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .manage-inventory-adjustments {
+    .adjustment-form {
+      .form-content {
+        .form-grid {
+          @apply grid-cols-1;
+        }
+      }
+    }
+    
+    .adjustments-list {
+      .adjustment-item {
+        .adjustment-details {
+          @apply grid-cols-1 gap-2;
+        }
+      }
+    }
+  }
+}
+
+// Animation Classes
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

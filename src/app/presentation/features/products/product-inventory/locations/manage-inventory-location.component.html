@@ -1,0 +1,454 @@
+
+<!-- Header Section -->
+<div class="space-y-6">
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <!-- Search -->
+      <div>
+        <label for="search" class="block text-sm font-medium text-slate-700 mb-2">
+          Search Locations
+        </label>
+        <div class="relative">
+          <span class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">search</span>
+          <input
+            id="search"
+            type="text"
+            formControlName="searchTerm"
+            placeholder="Name, code, or address..."
+            class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+      </div>
+
+      <!-- Type Filter -->
+      <div>
+        <label for="typeFilter" class="block text-sm font-medium text-slate-700 mb-2">
+          Type
+        </label>
+        <select
+          id="typeFilter"
+          formControlName="type"
+          class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">All Types</option>
+          <option value="warehouse">Warehouse</option>
+          <option value="store">Store</option>
+          <option value="supplier">Supplier</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div>
+        <label for="statusFilter" class="block text-sm font-medium text-slate-700 mb-2">
+          Status
+        </label>
+        <select
+          id="statusFilter"
+          formControlName="isActive"
+          class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">All Status</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="startCreate()"
+          [disabled]="isCreating || isEditing"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          <span class="material-icons text-sm">add</span>
+          New Location
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Location Form (When Creating/Editing) -->
+  <div *ngIf="isCreating || isEditing" class="bg-white rounded-lg border border-slate-200 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-semibold text-slate-900">
+        {{ isCreating ? 'Create New Location' : 'Edit Location' }}
+      </h3>
+      <button
+        type="button"
+        (click)="cancelForm()"
+        class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
+      >
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="locationForm" (ngSubmit)="saveLocation()">
+      <!-- Form Error Display -->
+      <div *ngIf="formError" class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+          <span class="material-icons text-red-400 mr-3">error</span>
+          <span class="text-sm text-red-700">{{ formError }}</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left Column -->
+        <div class="space-y-4">
+          <!-- Location Name -->
+          <div>
+            <label for="locationName" class="block text-sm font-medium text-slate-700 mb-2">
+              Location Name *
+            </label>
+            <input
+              id="locationName"
+              type="text"
+              formControlName="name"
+              (input)="onNameChange()"
+              placeholder="Enter location name"
+              class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-300]="hasError('name')"
+              [class.focus:ring-red-500]="hasError('name')"
+            />
+            <p *ngIf="hasError('name')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('name') }}
+            </p>
+          </div>
+
+          <!-- Location Code -->
+          <div>
+            <label for="locationCode" class="block text-sm font-medium text-slate-700 mb-2">
+              Location Code *
+            </label>
+            <input
+              id="locationCode"
+              type="text"
+              formControlName="code"
+              placeholder="AUTO-GENERATED"
+              class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
+              [class.border-red-300]="hasError('code')"
+              [class.focus:ring-red-500]="hasError('code')"
+            />
+            <p *ngIf="hasError('code')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('code') }}
+            </p>
+            <p *ngIf="!hasError('code')" class="mt-1 text-xs text-slate-500">
+              Unique identifier for this location (auto-generated from name)
+            </p>
+          </div>
+
+          <!-- Location Type -->
+          <div>
+            <label for="locationType" class="block text-sm font-medium text-slate-700 mb-2">
+              Location Type *
+            </label>
+            <select
+              id="locationType"
+              formControlName="type"
+              class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="warehouse">Warehouse</option>
+              <option value="store">Store</option>
+              <option value="supplier">Supplier</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="space-y-4">
+          <!-- Address -->
+          <div>
+            <label for="locationAddress" class="block text-sm font-medium text-slate-700 mb-2">
+              Address
+            </label>
+            <textarea
+              id="locationAddress"
+              formControlName="address"
+              rows="3"
+              placeholder="Enter full address (optional)"
+              class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            ></textarea>
+            <p class="mt-1 text-xs text-slate-500">
+              Physical address of the location
+            </p>
+          </div>
+
+          <!-- Active Status -->
+          <div>
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                formControlName="isActive"
+                class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+              />
+              <span class="ml-2 text-sm font-medium text-slate-700">
+                Active Location
+              </span>
+            </label>
+            <p class="mt-1 text-xs text-slate-500">
+              Active locations are available for inventory operations
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end gap-3 pt-6 border-t border-slate-200 mt-6">
+        <button
+          type="button"
+          (click)="cancelForm()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-all"
+        >
+          <span class="material-icons text-sm">close</span>
+          Cancel
+        </button>
+        
+        <button
+          type="submit"
+          [disabled]="!locationForm.valid || savingLocation"
+          class="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          <span *ngIf="savingLocation" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+          <span class="material-icons text-sm" *ngIf="!savingLocation">{{ isCreating ? 'add' : 'save' }}</span>
+          {{ savingLocation ? 'Saving...' : (isCreating ? 'Create Location' : 'Update Location') }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Locations List -->
+  <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <!-- List Header -->
+    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <h3 class="text-lg font-semibold text-slate-900">
+            Inventory Locations
+          </h3>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {{ filteredLocations.length }} {{ filteredLocations.length === 1 ? 'location' : 'locations' }}
+          </span>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div *ngIf="selectedLocations.size > 0" class="flex items-center gap-2">
+          <span class="text-sm text-slate-600">
+            {{ selectedLocations.size }} selected
+          </span>
+          <button
+            type="button"
+            (click)="clearSelection()"
+            class="text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <span class="material-icons text-sm">clear</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loadingLocations" class="px-6 py-12">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-slate-600">Loading locations...</span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loadingLocations" class="px-6 py-12">
+      <div class="text-center">
+        <span class="material-icons text-red-400 text-4xl mb-2 block">error</span>
+        <p class="text-slate-600">{{ error }}</p>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loadingLocations && !error && filteredLocations.length === 0" class="px-6 py-12">
+      <div class="text-center">
+        <span class="material-icons text-slate-400 text-4xl mb-2 block">location_off</span>
+        <h4 class="text-lg font-medium text-slate-900 mb-1">No locations found</h4>
+        <p class="text-slate-600 mb-4">
+          {{ locations.length === 0 ? 'Create your first inventory location to get started.' : 'No locations match your current filters.' }}
+        </p>
+        <button
+          *ngIf="locations.length === 0"
+          (click)="startCreate()"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+        >
+          <span class="material-icons text-sm">add</span>
+          Create First Location
+        </button>
+      </div>
+    </div>
+
+    <!-- Locations Table -->
+    <div *ngIf="!loadingLocations && !error && filteredLocations.length > 0">
+      <!-- Desktop Table -->
+      <div class="hidden lg:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Location
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Type
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Address
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th class="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider text-center">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-slate-200">
+            <tr *ngFor="let location of filteredLocations" class="hover:bg-slate-50">
+
+              <!-- Location Info -->
+              <td class="px-6 py-4">
+                <div class="flex items-start">
+                  <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 mr-3">
+                    <span class="material-icons text-slate-400">{{ location.type === 'warehouse' ? 'warehouse' : 'store' }}</span>
+                  </div>
+                  <div>
+                    <div class="text-sm font-semibold text-slate-900">{{ location.name }}</div>
+                    <div class="text-sm text-slate-500">{{ location.code }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Type -->
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                      [class]="getTypeClass(location.type)">
+                  {{ location.type | titlecase }}
+                </span>
+              </td>
+
+              <!-- Address -->
+              <td class="px-6 py-4 max-w-xs">
+                <div class="text-sm text-slate-900 truncate" [title]="location.address">
+                  {{ location.address || '—' }}
+                </div>
+              </td>
+
+              <!-- Status -->
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                      [class]="getStatusClass(location.isActive)">
+                  {{ location.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <button
+                    (click)="startEdit(location)"
+                    [disabled]="isCreating || isEditing"
+                    class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    [title]="'Edit ' + location.name"
+                  >
+                    <span class="material-icons text-sm">edit</span>
+                  </button>
+                  
+                  <button
+                    (click)="toggleLocationStatus(location)"
+                    class="p-2 transition-colors rounded-md"
+                    [class]="location.isActive 
+                      ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50' 
+                      : 'text-slate-400 hover:text-green-600 hover:bg-green-50'"
+                    [title]="(location.isActive ? 'Deactivate' : 'Activate') + ' ' + location.name"
+                  >
+                    <span class="material-icons text-sm">{{ location.isActive ? 'cancel' : 'check' }}</span>
+                  </button>
+
+                  <button
+                    (click)="deleteLocation(location)"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    [title]="'Delete ' + location.name"
+                  >
+                    <span class="material-icons text-sm">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards (lg screens and below) -->
+      <div class="lg:hidden divide-y divide-slate-200">
+        <div *ngFor="let location of filteredLocations" class="p-4">
+          <div class="flex items-start justify-between">
+            <!-- Checkbox & Info -->
+            <div class="flex items-start">
+              <input
+                type="checkbox"
+                [checked]="selectedLocations.has(location.id)"
+                (change)="toggleSelection(location.id)"
+                class="mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+              />
+              
+              <div class="ml-3">
+                <div class="flex items-center gap-2">
+                  <h4 class="text-sm font-semibold text-slate-900">{{ location.name }}</h4>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border"
+                        [class]="getStatusClass(location.isActive)">
+                    {{ location.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-sm text-slate-500">{{ location.code }}</span>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border"
+                        [class]="getTypeClass(location.type)">
+                    {{ location.type | titlecase }}
+                  </span>
+                </div>
+                
+                <p *ngIf="location.address" class="text-sm text-slate-600 mt-1">
+                  {{ location.address }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-1">
+              <button
+                (click)="startEdit(location)"
+                [disabled]="isCreating || isEditing"
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="material-icons text-sm">edit</span>
+              </button>
+              
+              <button
+                (click)="toggleLocationStatus(location)"
+                class="p-2 transition-colors rounded-md"
+                [class]="location.isActive 
+                  ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50' 
+                  : 'text-slate-400 hover:text-green-600 hover:bg-green-50'"
+              >
+                <span class="material-icons text-sm">{{ location.isActive ? 'cancel' : 'check' }}</span>
+              </button>
+
+              <button
+                (click)="deleteLocation(location)"
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+              >
+                <span class="material-icons text-sm">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

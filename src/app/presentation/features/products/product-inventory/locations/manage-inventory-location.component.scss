@@ -1,0 +1,473 @@
+// Manage Inventory Location Component Styles
+:host {
+  display: block;
+}
+
+// =============================================================================
+// FORM STYLES
+// =============================================================================
+
+.location-form {
+  .form-section {
+    @apply space-y-4;
+    
+    .form-group {
+      @apply space-y-2;
+      
+      label {
+        @apply block text-sm font-medium text-slate-700;
+      }
+      
+      input, select, textarea {
+        @apply block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm;
+        @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+        @apply transition-colors;
+
+        &.error {
+          @apply border-red-300 focus:ring-red-500 focus:border-red-500;
+        }
+
+        &:disabled {
+          @apply bg-slate-50 text-slate-500 cursor-not-allowed;
+        }
+      }
+
+      .error-message {
+        @apply mt-1 text-sm text-red-600;
+      }
+
+      .help-text {
+        @apply mt-1 text-sm text-slate-500;
+      }
+    }
+  }
+
+  .form-actions {
+    @apply flex justify-end gap-3 pt-6 border-t border-slate-200 mt-6;
+  }
+}
+
+// =============================================================================
+// TABLE STYLES
+// =============================================================================
+
+.locations-table {
+  .table-header {
+    @apply bg-slate-50 border-b border-slate-200;
+    
+    th {
+      @apply px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider;
+    }
+  }
+
+  .table-row {
+    @apply hover:bg-slate-50 transition-colors;
+    
+    td {
+      @apply px-6 py-4 whitespace-nowrap;
+    }
+
+    &.selected {
+      @apply bg-blue-50;
+    }
+  }
+
+  .location-info {
+    @apply flex items-start;
+
+    .location-icon {
+      @apply w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 mr-3;
+      
+      .material-icons {
+        @apply text-slate-400;
+      }
+    }
+
+    .location-details {
+      .location-name {
+        @apply text-sm font-semibold text-slate-900;
+      }
+
+      .location-code {
+        @apply text-sm text-slate-500;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// MOBILE CARD STYLES
+// =============================================================================
+
+.location-card {
+  @apply p-4 border-b border-slate-200 last:border-b-0;
+
+  .card-header {
+    @apply flex items-start justify-between;
+  }
+
+  .card-content {
+    @apply flex items-start;
+
+    .card-checkbox {
+      @apply mt-1;
+    }
+
+    .card-info {
+      @apply ml-3 flex-1;
+
+      .card-title {
+        @apply flex items-center gap-2 mb-1;
+
+        h4 {
+          @apply text-sm font-semibold text-slate-900;
+        }
+      }
+
+      .card-meta {
+        @apply flex items-center gap-2 mt-1 mb-2;
+
+        .code {
+          @apply text-sm text-slate-500;
+        }
+      }
+
+      .card-address {
+        @apply text-sm text-slate-600;
+      }
+    }
+  }
+
+  .card-actions {
+    @apply flex items-center gap-1;
+  }
+}
+
+// =============================================================================
+// BADGE STYLES
+// =============================================================================
+
+.status-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border;
+
+  &.active {
+    @apply bg-emerald-100 text-emerald-800 border-emerald-200;
+  }
+
+  &.inactive {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+}
+
+.type-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border;
+
+  &.warehouse {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+
+  &.store {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+
+  &.supplier {
+    @apply bg-purple-100 text-purple-800 border-purple-200;
+  }
+}
+
+// =============================================================================
+// BUTTON STYLES
+// =============================================================================
+
+.action-button {
+  @apply p-2 rounded-md transition-colors;
+
+  &.edit {
+    @apply text-slate-400 hover:text-blue-600 hover:bg-blue-50;
+  }
+
+  &.toggle {
+    @apply text-slate-400;
+
+    &.deactivate {
+      @apply hover:text-amber-600 hover:bg-amber-50;
+    }
+
+    &.activate {
+      @apply hover:text-green-600 hover:bg-green-50;
+    }
+  }
+
+  &.delete {
+    @apply text-slate-400 hover:text-red-600 hover:bg-red-50;
+  }
+
+  &:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}
+
+.primary-button {
+  @apply inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg;
+  @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed transition-all;
+}
+
+.secondary-button {
+  @apply inline-flex items-center gap-2 px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg;
+  @apply hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+  @apply transition-all;
+}
+
+// =============================================================================
+// STATE STYLES
+// =============================================================================
+
+.loading-state {
+  @apply px-6 py-12;
+
+  .loading-content {
+    @apply flex items-center justify-center;
+
+    .spinner {
+      @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+    }
+
+    .loading-text {
+      @apply ml-3 text-slate-600;
+    }
+  }
+}
+
+.empty-state {
+  @apply px-6 py-12 text-center;
+
+  .empty-icon {
+    @apply text-slate-400 text-4xl mb-2 block;
+  }
+
+  .empty-title {
+    @apply text-lg font-medium text-slate-900 mb-1;
+  }
+
+  .empty-description {
+    @apply text-slate-600 mb-4;
+  }
+}
+
+.error-state {
+  @apply px-6 py-12 text-center;
+
+  .error-icon {
+    @apply text-red-400 text-4xl mb-2 block;
+  }
+
+  .error-message {
+    @apply text-slate-600;
+  }
+}
+
+// =============================================================================
+// SEARCH AND FILTER STYLES
+// =============================================================================
+
+.search-section {
+  @apply bg-white rounded-lg border border-slate-200 p-4 mb-6;
+
+  .search-grid {
+    @apply grid grid-cols-1 md:grid-cols-4 gap-4 items-end;
+  }
+
+  .search-field {
+    .search-input {
+      @apply relative;
+
+      .search-icon {
+        @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400;
+      }
+
+      input {
+        @apply block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm;
+        @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+      }
+    }
+  }
+
+  .filter-field {
+    select {
+      @apply block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm;
+      @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    }
+  }
+
+  .action-field {
+    @apply flex items-center gap-2;
+  }
+}
+
+// =============================================================================
+// HEADER STYLES
+// =============================================================================
+
+.list-header {
+  @apply px-6 py-4 border-b border-slate-200 bg-slate-50;
+
+  .header-content {
+    @apply flex items-center justify-between;
+  }
+
+  .header-left {
+    @apply flex items-center gap-4;
+
+    .header-title {
+      @apply text-lg font-semibold text-slate-900;
+    }
+
+    .header-count {
+      @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
+    }
+  }
+
+  .header-right {
+    .bulk-actions {
+      @apply flex items-center gap-2;
+
+      .selected-count {
+        @apply text-sm text-slate-600;
+      }
+
+      .clear-selection {
+        @apply text-slate-400 hover:text-slate-600 transition-colors;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// FORM ERROR STYLES
+// =============================================================================
+
+.form-error {
+  @apply mb-4 bg-red-50 border border-red-200 rounded-lg p-4;
+
+  .error-content {
+    @apply flex;
+
+    .error-icon {
+      @apply text-red-400 mr-3;
+    }
+
+    .error-text {
+      @apply text-sm text-red-700;
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE OVERRIDES
+// =============================================================================
+
+@media (max-width: 1024px) {
+  .locations-table {
+    @apply hidden;
+  }
+
+  .location-cards {
+    @apply block;
+  }
+}
+
+@media (min-width: 1025px) {
+  .locations-table {
+    @apply block;
+  }
+
+  .location-cards {
+    @apply hidden;
+  }
+}
+
+// =============================================================================
+// ANIMATION STYLES
+// =============================================================================
+
+.fade-in {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// =============================================================================
+// CHECKBOX STYLES
+// =============================================================================
+
+.custom-checkbox {
+  @apply rounded border-slate-300 text-blue-600;
+  @apply focus:ring-blue-500 focus:ring-2 focus:ring-offset-0;
+  @apply transition-colors;
+
+  &:indeterminate {
+    @apply bg-blue-600 border-blue-600;
+  }
+}
+
+// =============================================================================
+// TOOLTIP STYLES
+// =============================================================================
+
+.tooltip {
+  @apply hidden;
+  
+  &:hover .tooltip-content {
+    @apply block absolute z-10 px-2 py-1 text-xs text-white bg-slate-900 rounded;
+    @apply transform -translate-x-1/2 -translate-y-full;
+  }
+}
+
+// =============================================================================
+// FOCUS STYLES
+// =============================================================================
+
+.focus-visible\:ring-offset-white:focus-visible {
+  --tw-ring-offset-color: #fff;
+}
+
+// =============================================================================
+// PRINT STYLES
+// =============================================================================
+
+@media print {
+  .location-form,
+  .search-section,
+  .action-button {
+    @apply hidden;
+  }
+
+  .locations-table {
+    .table-row {
+      @apply hover:bg-transparent;
+    }
+  }
+}

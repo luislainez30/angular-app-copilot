@@ -1,0 +1,1 @@
+export { StockMovementsComponent } from './stock-movements.component';

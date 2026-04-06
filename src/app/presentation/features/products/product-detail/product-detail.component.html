@@ -1,0 +1,457 @@
+<div class="min-h-screen bg-slate-50">
+  <!-- Page Header -->
+  <div class="bg-white border-b border-slate-200 sticky top-16 z-20">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-3">
+            <button
+              (click)="goBack()"
+              class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
+              <span class="material-icons">arrow_back</span>
+            </button>
+            <div>
+              <h1 class="text-2xl font-semibold text-slate-900">
+                <span *ngIf="product">{{ product.name }}</span>
+                <span *ngIf="!product && !loading">Product Details</span>
+              </h1>
+              <p class="mt-1 text-sm text-slate-600">
+                <span *ngIf="product">SKU: {{ product.sku }} • ID: {{ product.id }}</span>
+                <span *ngIf="!product && !loading">Product information and specifications</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div *ngIf="product" class="flex items-center gap-3">
+          <button
+            (click)="shareProduct()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-700 hover:bg-slate-50 rounded-md transition-colors">
+            <span class="material-icons text-sm">share</span>
+            Share
+          </button>
+          <button
+            (click)="manageInventory()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors">
+            <span class="material-icons text-sm">inventory</span>
+            Manage Inventory
+          </button>
+          <button
+            (click)="duplicateProduct()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-md transition-colors">
+            <span class="material-icons text-sm">content_copy</span>
+            Duplicate
+          </button>
+          <button
+            (click)="editProduct()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors">
+            <span class="material-icons text-sm">edit</span>
+            Edit
+          </button>
+          <button
+            (click)="deleteProduct()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">
+            <span class="material-icons text-sm">delete</span>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="max-w-7xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl border border-slate-200 p-8">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-slate-600">Loading product details...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="max-w-7xl mx-auto px-4 py-8">
+    <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+      <div class="flex items-center">
+        <span class="material-icons text-red-400 mr-3">error</span>
+        <div>
+          <h3 class="text-lg font-medium text-red-800">Product Not Found</h3>
+          <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+          <div class="mt-4">
+            <button
+              (click)="goBack()"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700">
+              <span class="material-icons text-sm">arrow_back</span>
+              Back to Product List
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Details -->
+  <div *ngIf="product && !loading && !error" class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Product Information Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h2 class="text-lg font-medium text-slate-900 flex items-center gap-2">
+              <span class="material-icons text-slate-600">inventory_2</span>
+              Product Information
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Product Name</label>
+                <p class="text-xl text-slate-900 font-medium">{{ product.name }}</p>
+              </div>
+              <div class="md:col-span-2" *ngIf="product.shortDescription">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Short Description</label>
+                <p class="text-lg text-slate-700">{{ product.shortDescription }}</p>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                <p class="text-slate-900 leading-relaxed">{{ product.description }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">SKU</label>
+                <div class="flex items-center gap-2">
+                  <p class="text-lg text-slate-900 font-mono">{{ product.sku }}</p>
+                  <button
+                    (click)="copyToClipboard(product.sku)"
+                    class="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
+                    title="Copy SKU">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+              </div>
+              <div *ngIf="product.barcode">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Barcode</label>
+                <div class="flex items-center gap-2">
+                  <p class="text-lg text-slate-900 font-mono">{{ product.barcode }}</p>
+                  <button
+                    (click)="copyToClipboard(product.barcode)"
+                    class="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
+                    title="Copy Barcode">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+              </div>
+              <div *ngIf="product.brand">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Brand</label>
+                <p class="text-lg text-slate-900">{{ product.brand }}</p>
+              </div>
+              <div *ngIf="product.manufacturer">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Manufacturer</label>
+                <p class="text-lg text-slate-900">{{ product.manufacturer }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Created Date</label>
+                <p class="text-lg text-slate-900">{{ formatDate(product.createdAt) }}</p>
+                <p class="text-sm text-slate-500">{{ getDaysSinceCreation() }} days ago</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Last Updated</label>
+                <p class="text-lg text-slate-900">{{ formatDate(product.updatedAt) }}</p>
+              </div>
+            </div>
+            
+            <!-- Tags Display -->
+            <div class="mt-6" *ngIf="product.tags && product.tags.length > 0">
+              <label class="block text-sm font-medium text-slate-700 mb-3">Tags</label>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  *ngFor="let tag of product.tags"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing & Inventory Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h2 class="text-lg font-medium text-slate-900 flex items-center gap-2">
+              <span class="material-icons text-slate-600">attach_money</span>
+              Pricing & Inventory
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Selling Price</label>
+                <p class="text-2xl text-slate-900 font-bold">{{ formatCurrency(product.price) }}</p>
+                <div *ngIf="isOnSale()" class="flex items-center gap-2 mt-1">
+                  <span class="text-lg text-slate-400 line-through">{{ formatCurrency(product.compareAtPrice!) }}</span>
+                  <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                    {{ getDiscountPercentage() }}% OFF
+                  </span>
+                </div>
+              </div>
+              <div *ngIf="product.costPrice">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Cost Price</label>
+                <p class="text-lg text-slate-900">{{ formatCurrency(product.costPrice) }}</p>
+                <p class="text-sm text-slate-500" *ngIf="product.costPrice">
+                  Margin: {{ formatCurrency(product.price - product.costPrice) }}
+                </p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Inventory Tracking</label>
+                <p class="text-lg text-slate-900">{{ getInventoryTrackingLabel(product.trackInventory) }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Backorder Policy</label>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium"
+                      [class]="product.allowBackorder ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                  <span class="material-icons text-sm">{{ product.allowBackorder ? 'check_circle' : 'block' }}</span>
+                  {{ product.allowBackorder ? 'Allowed' : 'Not Allowed' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Physical Properties & Shipping Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h2 class="text-lg font-medium text-slate-900 flex items-center gap-2">
+              <span class="material-icons text-slate-600">straighten</span>
+              Physical Properties & Shipping
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div *ngIf="product.weight">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Weight</label>
+                <p class="text-lg text-slate-900">{{ formatWeight(product.weight) }}</p>
+              </div>
+              <div *ngIf="product.dimensions">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Dimensions (L × W × H)</label>
+                <p class="text-lg text-slate-900">{{ formatDimensions() }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Requires Shipping</label>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium"
+                      [class]="product.requiresShipping ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'">
+                  <span class="material-icons text-sm">{{ product.requiresShipping ? 'local_shipping' : 'cloud_download' }}</span>
+                  {{ product.requiresShipping ? 'Physical Product' : 'Digital Product' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Media & SEO Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm" *ngIf="product.images?.length || product.thumbnailUrl || product.metaTitle || product.metaDescription">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h2 class="text-lg font-medium text-slate-900 flex items-center gap-2">
+              <span class="material-icons text-slate-600">image</span>
+              Media & SEO
+            </h2>
+          </div>
+          <div class="p-6">
+            <!-- Thumbnail -->
+            <div *ngIf="product.thumbnailUrl" class="mb-6">
+              <label class="block text-sm font-medium text-slate-700 mb-3">Thumbnail Image</label>
+              <div class="flex items-center gap-4">
+                <img
+                  [src]="product.thumbnailUrl"
+                  [alt]="product.name"
+                  class="w-20 h-20 object-cover rounded-lg border border-slate-200"
+                >
+                <div>
+                  <p class="text-sm text-slate-600">{{ product.thumbnailUrl }}</p>
+                  <button
+                    (click)="openProductUrl()"
+                    class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                    View Image
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Images -->
+            <div *ngIf="product.images && product.images.length > 0" class="mb-6">
+              <label class="block text-sm font-medium text-slate-700 mb-3">Additional Images ({{ product.images.length }})</label>
+              <div class="grid grid-cols-4 gap-3">
+                <img
+                  *ngFor="let image of product.images"
+                  [src]="image"
+                  [alt]="product.name"
+                  class="w-16 h-16 object-cover rounded border border-slate-200 cursor-pointer hover:opacity-75"
+                  (click)="openProductUrl()"
+                 >
+              </div>
+            </div>
+
+            <!-- SEO Information -->
+            <div class="grid grid-cols-1 gap-4" *ngIf="product.metaTitle || product.metaDescription">
+              <div *ngIf="product.metaTitle">
+                <label class="block text-sm font-medium text-slate-700 mb-1">SEO Title</label>
+                <p class="text-slate-900">{{ product.metaTitle }}</p>
+              </div>
+              <div *ngIf="product.metaDescription">
+                <label class="block text-sm font-medium text-slate-700 mb-1">SEO Description</label>
+                <p class="text-slate-900">{{ product.metaDescription }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        
+        <!-- Product Status Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h3 class="text-lg font-medium text-slate-900">Status</h3>
+          </div>
+          <div class="p-6 text-center">
+            <div class="mb-4">
+              <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+                    [class]="getStatusClass(product.status)">
+                <span class="w-2 h-2 rounded-full bg-current"></span>
+                {{ getStatusLabel(product.status) }}
+              </span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-center gap-2">
+                <span class="material-icons text-sm" 
+                      [class]="product.isVisible ? 'text-green-600' : 'text-slate-400'">
+                  {{ product.isVisible ? 'visibility' : 'visibility_off' }}
+                </span>
+                <span class="text-sm text-slate-600">
+                  {{ product.isVisible ? 'Visible in catalog' : 'Hidden from catalog' }}
+                </span>
+              </div>
+              <div *ngIf="product.isFeatured" class="flex items-center justify-center gap-2">
+                <span class="material-icons text-sm text-yellow-500">star</span>
+                <span class="text-sm text-slate-600">Featured Product</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h3 class="text-lg font-medium text-slate-900">Quick Actions</h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <button
+              (click)="editProduct()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50 rounded-md transition-colors">
+              <span class="material-icons text-blue-600">edit</span>
+              <div>
+                <div class="font-medium">Edit Product</div>
+                <div class="text-sm text-slate-500">Update product information</div>
+              </div>
+            </button>
+            <button
+              (click)="duplicateProduct()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50 rounded-md transition-colors">
+              <span class="material-icons text-purple-600">content_copy</span>
+              <div>
+                <div class="font-medium">Duplicate Product</div>
+                <div class="text-sm text-slate-500">Create copy with same details</div>
+              </div>
+            </button>
+            <button
+              (click)="shareProduct()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50 rounded-md transition-colors">
+              <span class="material-icons text-green-600">share</span>
+              <div>
+                <div class="font-medium">Share Product</div>
+                <div class="text-sm text-slate-500">Copy product link</div>
+              </div>
+            </button>
+            <button
+              (click)="manageInventory()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50 rounded-md transition-colors">
+              <span class="material-icons text-green-600">inventory</span>
+              <div>
+                <div class="font-medium">Manage Inventory</div>
+                <div class="text-sm text-slate-500">Update stock levels</div>
+              </div>
+            </button>
+            <button
+              (click)="sendProductEmail()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-700 hover:bg-slate-50 rounded-md transition-colors">
+              <span class="material-icons text-orange-600">email</span>
+              <div>
+                <div class="font-medium">Email Product</div>
+                <div class="text-sm text-slate-500">Send product details</div>
+              </div>
+            </button>
+            <hr class="my-3">
+            <button
+              (click)="deleteProduct()"
+              class="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-md transition-colors">
+              <span class="material-icons text-red-600">delete</span>
+              <div>
+                <div class="font-medium">Delete Product</div>
+                <div class="text-sm text-red-500">Permanently remove</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Stats Card -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h3 class="text-lg font-medium text-slate-900">Product Stats</h3>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-600">Created</span>
+                <span class="font-medium text-slate-900">{{ formatDate(product.createdAt) }}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-600">Age</span>
+                <span class="font-medium text-slate-900">{{ getDaysSinceCreation() }} days</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-600">Last Modified</span>
+                <span class="font-medium text-slate-900">{{ formatDate(product.updatedAt) }}</span>
+              </div>
+              <div class="flex justify-between items-center" *ngIf="product.publishedAt">
+                <span class="text-sm text-slate-600">Published</span>
+                <span class="font-medium text-slate-900">{{ formatDate(product.publishedAt) }}</span>
+              </div>
+              <div class="flex justify-between items-center" *ngIf="isOnSale()">
+                <span class="text-sm text-slate-600">Discount</span>
+                <span class="text-xs px-2 py-1 rounded font-medium bg-green-100 text-green-800">
+                  {{ getDiscountPercentage() }}% OFF
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Internal Notes Card -->
+        <div *ngIf="product.notes" class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h3 class="text-lg font-medium text-slate-900 flex items-center gap-2">
+              <span class="material-icons text-slate-600">note</span>
+              Internal Notes
+            </h3>
+          </div>
+          <div class="p-6">
+            <p class="text-slate-900 leading-relaxed">{{ product.notes }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
