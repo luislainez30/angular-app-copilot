@@ -26,11 +26,11 @@ export const routes: Routes = [
 //     loadComponent: () => import('./presentation/features/inventory/inventory-list/inventory-list.component').then(c => c.InventoryListComponent),
 //     data: { title: 'Inventory' }
 //   },
-//   {
-//     path: 'sales',
-//     loadComponent: () => import('./presentation/features/sales/sales-list/sales-list.component').then(c => c.SalesListComponent),
-//     data: { title: 'Sales' }
-//   },
+  {
+    path: 'sales',
+    loadChildren: () => import('./presentation/features/sales/sale.routes').then(r => r.saleRoutes),
+    data: { title: 'Sales' }
+  },
 //   {
 //     path: 'purchases',
 //     loadComponent: () => import('./presentation/features/purchases/purchase-list/purchase-list.component').then(c => c.PurchaseListComponent),

@@ -1,0 +1,628 @@
+<div class="min-h-screen bg-slate-50">
+
+  <!-- Page Header -->
+  <app-page-title
+    title="New Sale"
+    subtitle="Create a new sale record with customer and line items">
+    <button
+      type="button"
+      routerLink="/sales/list"
+      class="inline-flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
+      <span class="material-icons text-sm">arrow_back</span>
+      Back to Sales
+    </button>
+  </app-page-title>
+
+  <!-- Loading Skeleton -->
+  <div *ngIf="isLoadingData" class="max-w-screen-xl mx-auto px-4 py-6">
+    <div class="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <span class="ml-3 text-slate-600">Loading customers and products...</span>
+    </div>
+  </div>
+
+  <!-- Loading Error -->
+  <div *ngIf="loadingError && !isLoadingData" class="max-w-screen-xl mx-auto px-4 py-6">
+    <div class="bg-red-50 border border-red-200 rounded-xl p-6 flex items-start gap-3">
+      <span class="material-icons text-red-500">error</span>
+      <div>
+        <p class="text-sm font-medium text-red-800">{{ loadingError }}</p>
+        <button (click)="loadReferenceData()" class="mt-3 text-sm font-medium text-red-700 hover:text-red-900 underline">
+          Try again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <div *ngIf="!isLoadingData && !loadingError" class="max-w-screen-xl mx-auto px-4 py-6">
+    <form [formGroup]="saleForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="flex flex-col xl:flex-row gap-6">
+
+        <!-- ══════════════════════════════════════════════════════════
+             LEFT COLUMN — Header sections + Line Items
+        ══════════════════════════════════════════════════════════ -->
+        <div class="flex-1 min-w-0 space-y-6">
+
+          <!-- ── 1. Customer ──────────────────────────────────────────────── -->
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-semibold text-slate-900 flex items-center gap-2">
+                  <span class="material-icons text-slate-400 text-base">person</span>
+                  Customer <span class="text-red-500 ml-0.5 font-normal">*</span>
+                </h3>
+                <p class="mt-0.5 text-sm text-slate-500">Select the customer for this sale</p>
+              </div>
+              <button
+                *ngIf="selectedCustomer"
+                type="button"
+                (click)="clearCustomer()"
+                class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+                <span class="material-icons text-xs">swap_horiz</span>
+                Change
+              </button>
+            </div>
+
+            <div class="px-6 py-5">
+
+              <!-- SELECTED CUSTOMER CARD -->
+              <div *ngIf="selectedCustomer" class="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <div class="flex-shrink-0 h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg select-none">
+                  {{ selectedCustomer.firstName[0] }}{{ selectedCustomer.lastName[0] }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-900">{{ selectedCustomer.firstName }} {{ selectedCustomer.lastName }}</p>
+                  <p class="text-xs text-slate-600 mt-0.5">{{ selectedCustomer.email }}</p>
+                  <p class="text-xs text-slate-400 mt-0.5">{{ selectedCustomer.phone }}</p>
+                </div>
+                <div class="text-right hidden sm:block shrink-0">
+                  <p class="text-xs text-slate-600">{{ selectedCustomer.address.city }}</p>
+                  <p class="text-xs text-slate-400">{{ selectedCustomer.address.country }}</p>
+                </div>
+                <span class="material-icons text-blue-600 shrink-0">check_circle</span>
+              </div>
+
+              <!-- CUSTOMER PICKER -->
+              <div *ngIf="!selectedCustomer">
+                <!-- Search -->
+                <div class="relative mb-4">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="material-icons text-slate-400 text-lg">search</span>
+                  </div>
+                  <input
+                    type="text"
+                    [value]="customerSearchQuery"
+                    (input)="customerSearchQuery = $any($event.target).value"
+                    placeholder="Search by name, email or phone…"
+                    class="block w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+
+                <!-- Customer list -->
+                <div class="max-h-56 overflow-y-auto space-y-1.5 pr-0.5">
+                  <button
+                    *ngFor="let customer of filteredCustomers; trackBy: trackByCustomerId"
+                    type="button"
+                    (click)="selectCustomer(customer)"
+                    class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all text-left border-slate-200 hover:border-blue-300 hover:bg-blue-50 bg-white group">
+                    <div class="flex-shrink-0 h-9 w-9 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center text-slate-500 group-hover:text-blue-700 text-xs font-bold transition-colors select-none">
+                      {{ customer.firstName[0] }}{{ customer.lastName[0] }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-slate-800 group-hover:text-blue-800 truncate">{{ customer.firstName }} {{ customer.lastName }}</p>
+                      <p class="text-xs text-slate-500 truncate">{{ customer.email }}</p>
+                    </div>
+                    <span class="text-xs text-slate-400 hidden sm:block shrink-0">{{ customer.address.city }}</span>
+                  </button>
+
+                  <!-- Empty state -->
+                  <div *ngIf="filteredCustomers.length === 0" class="text-center py-8">
+                    <span class="material-icons text-slate-300 text-4xl">person_off</span>
+                    <p class="text-sm text-slate-500 mt-2">No customers match "{{ customerSearchQuery }}"</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Validation error -->
+              <div *ngIf="isFieldInvalid('customerId')" class="mt-3 flex items-center gap-1 text-xs text-red-600">
+                <span class="material-icons text-xs">error</span>
+                Please select a customer to continue
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 2. Payment Details ──────────────────────────────────────────── -->
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+              <h3 class="text-base font-semibold text-slate-900 flex items-center gap-2">
+                <span class="material-icons text-slate-400 text-base">payments</span>
+                Payment Details
+              </h3>
+              <p class="mt-0.5 text-sm text-slate-500">Payment method, due date and shipping</p>
+            </div>
+
+            <div class="px-6 py-5 space-y-5">
+
+              <!-- Payment method icon-cards -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-3">
+                  Payment Method
+                  <span class="ml-1 text-xs text-slate-400 font-normal">(optional — click to select)</span>
+                </label>
+                <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                  <button
+                    *ngFor="let method of paymentMethods"
+                    type="button"
+                    (click)="selectPaymentMethod(method)"
+                    class="flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1"
+                    [class.border-blue-500]="selectedPaymentMethod === method"
+                    [class.bg-blue-50]="selectedPaymentMethod === method"
+                    [class.text-blue-700]="selectedPaymentMethod === method"
+                    [class.border-slate-200]="selectedPaymentMethod !== method"
+                    [class.text-slate-500]="selectedPaymentMethod !== method"
+                    [class.hover:border-slate-300]="selectedPaymentMethod !== method"
+                    [class.hover:bg-slate-50]="selectedPaymentMethod !== method">
+                    <span
+                      class="material-icons text-xl"
+                      [class.text-blue-600]="selectedPaymentMethod === method"
+                      [class.text-slate-400]="selectedPaymentMethod !== method">
+                      {{ getPaymentMethodIcon(method) }}
+                    </span>
+                    {{ getPaymentMethodLabel(method) }}
+                  </button>
+                </div>
+                <!-- Selected indicator -->
+                <p *ngIf="selectedPaymentMethod" class="mt-2 text-xs text-blue-600 flex items-center gap-1">
+                  <span class="material-icons text-xs">check_circle</span>
+                  {{ getPaymentMethodLabel(selectedPaymentMethod) }} selected — click again to deselect
+                </p>
+              </div>
+
+              <!-- Due Date + Shipping Cost -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Due Date -->
+                <div>
+                  <label for="dueDate" class="block text-sm font-medium text-slate-700 mb-1.5">
+                    Payment Due Date
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span class="material-icons text-slate-400 text-base">event</span>
+                    </div>
+                    <input
+                      id="dueDate"
+                      type="date"
+                      formControlName="dueDate"
+                      [class]="getInputClasses('dueDate') + ' pl-10'"
+                    />
+                  </div>
+                  <p class="mt-1.5 text-xs text-slate-500">For invoiced / credit sales</p>
+                  <div *ngIf="isFieldInvalid('dueDate')" class="mt-1 space-y-0.5">
+                    <p *ngFor="let err of getFieldErrorMessages('dueDate')" class="flex items-center gap-1 text-xs text-red-600">
+                      <span class="material-icons text-xs">error</span>{{ err }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Shipping Cost -->
+                <div>
+                  <label for="shippingCost" class="block text-sm font-medium text-slate-700 mb-1.5">
+                    Shipping Cost
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 text-sm font-medium">$</span>
+                    <input
+                      id="shippingCost"
+                      type="number"
+                      formControlName="shippingCost"
+                      min="0"
+                      max="99999.99"
+                      step="0.01"
+                      placeholder="0.00"
+                      [class]="getInputClasses('shippingCost') + ' pl-7'"
+                    />
+                  </div>
+                  <p class="mt-1.5 text-xs text-slate-500">Enter 0 if no shipping charge</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 3. Notes & Reference ───────────────────────────────────────── -->
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+              <h3 class="text-base font-semibold text-slate-900 flex items-center gap-2">
+                <span class="material-icons text-slate-400 text-base">notes</span>
+                Notes &amp; Reference
+              </h3>
+              <p class="mt-0.5 text-sm text-slate-500">Add notes and optional reference identifiers</p>
+            </div>
+
+            <div class="px-6 py-5 space-y-5">
+
+              <!-- Customer Notes + Internal Notes side by side -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Customer Notes -->
+                <div>
+                  <label for="notes" class="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                    <span class="material-icons text-slate-400 text-base">chat_bubble_outline</span>
+                    Customer Notes
+                  </label>
+                  <textarea
+                    id="notes"
+                    formControlName="notes"
+                    rows="4"
+                    placeholder="Visible to the customer on the invoice…"
+                    [class]="getInputClasses('notes')">
+                  </textarea>
+                  <p class="mt-1.5 text-xs text-slate-500">Printed on the invoice</p>
+                  <div *ngIf="isFieldInvalid('notes')" class="mt-1 space-y-0.5">
+                    <p *ngFor="let err of getFieldErrorMessages('notes')" class="text-xs text-red-600">{{ err }}</p>
+                  </div>
+                </div>
+
+                <!-- Internal Notes -->
+                <div>
+                  <label for="internalNotes" class="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                    <span class="material-icons text-slate-400 text-base">lock_outline</span>
+                    Internal Notes
+                  </label>
+                  <textarea
+                    id="internalNotes"
+                    formControlName="internalNotes"
+                    rows="4"
+                    placeholder="Private notes — not visible to the customer…"
+                    [class]="getInputClasses('internalNotes')">
+                  </textarea>
+                  <p class="mt-1.5 text-xs text-slate-500">Not printed on the invoice</p>
+                  <div *ngIf="isFieldInvalid('internalNotes')" class="mt-1 space-y-0.5">
+                    <p *ngFor="let err of getFieldErrorMessages('internalNotes')" class="text-xs text-red-600">{{ err }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- External Reference -->
+              <div>
+                <label for="externalReference" class="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                  <span class="material-icons text-slate-400 text-base">tag</span>
+                  External Reference
+                  <span class="ml-1 text-xs text-slate-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  id="externalReference"
+                  type="text"
+                  formControlName="externalReference"
+                  placeholder="e.g. PO-2026-001"
+                  [class]="getInputClasses('externalReference')"
+                />
+                <p class="mt-1.5 text-xs text-slate-500">Purchase order number or external system reference (letters, numbers, hyphens, underscores)</p>
+                <div *ngIf="isFieldInvalid('externalReference')" class="mt-1 space-y-0.5">
+                  <p *ngFor="let err of getFieldErrorMessages('externalReference')" class="flex items-center gap-1 text-xs text-red-600">
+                    <span class="material-icons text-xs">error</span>{{ err }}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ─────────────────────────────────────────────────────────
+               Line Items Card
+          ───────────────────────────────────────────────────────── -->
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+
+            <!-- Card Header -->
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-semibold text-slate-900">Line Items</h3>
+                <p class="mt-0.5 text-sm text-slate-500">Add the products included in this sale</p>
+              </div>
+              <button
+                type="button"
+                (click)="addItem()"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-sm">
+                <span class="material-icons text-sm">add</span>
+                Add Item
+              </button>
+            </div>
+
+            <!-- Items Table -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-slate-200">
+
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider min-w-[220px]">
+                      Product <span class="text-red-500">*</span>
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-24">
+                      Qty <span class="text-red-500">*</span>
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-32">
+                      Unit Price <span class="text-red-500">*</span>
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-36">
+                      Discount
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">
+                      Tax %
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">
+                      Total
+                    </th>
+                    <th class="px-4 py-3 w-12"></th>
+                  </tr>
+                </thead>
+
+                <tbody formArrayName="items" class="divide-y divide-slate-100">
+                  <tr
+                    *ngFor="let row of itemsArray.controls; let i = index; trackBy: trackByIndex"
+                    [formGroupName]="i"
+                    class="hover:bg-slate-50 transition-colors align-top">
+
+                    <!-- Product -->
+                    <td class="px-4 py-3">
+                      <select
+                        formControlName="productId"
+                        (change)="onProductChange(i)"
+                        [class]="getItemInputClasses(i, 'productId')">
+                        <option value="" disabled>Select product…</option>
+                        <option
+                          *ngFor="let opt of getProductOptions()"
+                          [value]="opt.value">
+                          {{ opt.label }}
+                        </option>
+                      </select>
+                      <div *ngIf="isItemFieldInvalid(i, 'productId')" class="mt-1 text-xs text-red-600 flex items-center gap-0.5">
+                        <span class="material-icons text-xs">error</span> Required
+                      </div>
+                    </td>
+
+                    <!-- Quantity -->
+                    <td class="px-4 py-3">
+                      <input
+                        type="number"
+                        formControlName="quantity"
+                        min="1"
+                        max="9999"
+                        [class]="getItemInputClasses(i, 'quantity')"
+                      />
+                      <div *ngIf="isItemFieldInvalid(i, 'quantity')" class="mt-1 text-xs text-red-600 flex items-center gap-0.5">
+                        <span class="material-icons text-xs">error</span> Invalid
+                      </div>
+                    </td>
+
+                    <!-- Unit Price -->
+                    <td class="px-4 py-3">
+                      <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 text-sm pointer-events-none">$</span>
+                        <input
+                          type="number"
+                          formControlName="unitPrice"
+                          min="0.01"
+                          step="0.01"
+                          [class]="getItemInputClasses(i, 'unitPrice')"
+                          class="pl-6"
+                        />
+                      </div>
+                      <div *ngIf="isItemFieldInvalid(i, 'unitPrice')" class="mt-1 text-xs text-red-600 flex items-center gap-0.5">
+                        <span class="material-icons text-xs">error</span> Required
+                      </div>
+                    </td>
+
+                    <!-- Discount (type + value stacked) -->
+                    <td class="px-4 py-3">
+                      <select
+                        formControlName="discountType"
+                        [class]="getItemInputClasses(i, 'discountType') + ' mb-1.5'">
+                        <option
+                          *ngFor="let opt of getDiscountTypeOptions()"
+                          [value]="opt.value">
+                          {{ opt.label }}
+                        </option>
+                      </select>
+                      <input
+                        *ngIf="itemsArray.at(i).get('discountType')?.value !== DiscountType.NONE"
+                        type="number"
+                        formControlName="discountValue"
+                        min="0"
+                        step="0.01"
+                        [placeholder]="itemsArray.at(i).get('discountType')?.value === DiscountType.PERCENTAGE ? '0–100' : '0.00'"
+                        [class]="getItemInputClasses(i, 'discountValue')"
+                      />
+                    </td>
+
+                    <!-- Tax Rate -->
+                    <td class="px-4 py-3">
+                      <div class="relative">
+                        <input
+                          type="number"
+                          formControlName="taxRate"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          placeholder="0"
+                          [class]="getItemInputClasses(i, 'taxRate')"
+                          class="pr-7"
+                        />
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-sm pointer-events-none">%</span>
+                      </div>
+                    </td>
+
+                    <!-- Line Total -->
+                    <td class="px-4 py-3 text-right">
+                      <span class="text-sm font-semibold text-slate-900">
+                        ${{ getItemLineTotal(i).toFixed(2) }}
+                      </span>
+                    </td>
+
+                    <!-- Remove -->
+                    <td class="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        (click)="removeItem(i)"
+                        [disabled]="itemsArray.length === 1"
+                        [class.opacity-30]="itemsArray.length === 1"
+                        [class.cursor-not-allowed]="itemsArray.length === 1"
+                        class="w-7 h-7 rounded-lg flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
+                        title="Remove item">
+                        <span class="material-icons text-base">remove_circle_outline</span>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
+
+            <!-- Items footer: item count + add button -->
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+              <span class="text-xs text-slate-500">
+                {{ itemsArray.length }} {{ itemsArray.length === 1 ? 'item' : 'items' }}
+              </span>
+              <button
+                type="button"
+                (click)="addItem()"
+                class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                <span class="material-icons text-sm">add_circle_outline</span>
+                Add another item
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             RIGHT COLUMN — Order Summary + Actions
+        ══════════════════════════════════════════════════════════ -->
+        <div class="xl:w-80 shrink-0 space-y-4">
+
+          <!-- Order Summary -->
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm sticky top-6">
+
+            <div class="bg-slate-50 px-5 py-4 border-b border-slate-200">
+              <h3 class="text-base font-semibold text-slate-900 flex items-center gap-2">
+                <span class="material-icons text-slate-400 text-base">receipt_long</span>
+                Order Summary
+              </h3>
+            </div>
+
+            <div class="px-5 py-5 space-y-3">
+              <!-- Subtotal -->
+              <div class="flex justify-between text-sm text-slate-700">
+                <span>Subtotal</span>
+                <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
+              </div>
+
+              <!-- Discount -->
+              <div class="flex justify-between text-sm"
+                   [class.text-green-700]="totalDiscount > 0"
+                   [class.text-slate-400]="totalDiscount === 0">
+                <span>Discount</span>
+                <span class="font-medium">
+                  {{ totalDiscount > 0 ? '− $' + totalDiscount.toFixed(2) : '—' }}
+                </span>
+              </div>
+
+              <!-- Tax -->
+              <div class="flex justify-between text-sm text-slate-700">
+                <span>Tax</span>
+                <span class="font-medium">
+                  {{ totalTax > 0 ? '$' + totalTax.toFixed(2) : '—' }}
+                </span>
+              </div>
+
+              <!-- Shipping -->
+              <div class="flex justify-between text-sm text-slate-700">
+                <span>Shipping</span>
+                <span class="font-medium">
+                  {{ shippingCost > 0 ? '$' + shippingCost.toFixed(2) : '—' }}
+                </span>
+              </div>
+
+              <!-- Divider -->
+              <div class="border-t border-slate-200 pt-3">
+                <div class="flex justify-between">
+                  <span class="text-base font-semibold text-slate-900">Total</span>
+                  <span class="text-xl font-bold text-blue-600">${{ grandTotal.toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form status indicator -->
+            <div class="px-5 pb-4 space-y-2">
+              <div *ngIf="saleForm.invalid && saleForm.dirty" class="flex items-center gap-2 text-amber-600 text-xs bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+                <span class="material-icons text-sm">warning</span>
+                Please fix the errors above
+              </div>
+              <div *ngIf="saleForm.valid && saleForm.dirty" class="flex items-center gap-2 text-green-700 text-xs bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                <span class="material-icons text-sm">check_circle</span>
+                Form is valid — ready to submit
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="px-5 pb-5 space-y-3 border-t border-slate-200 pt-4">
+              <!-- Submit -->
+              <button
+                type="submit"
+                [disabled]="saleForm.invalid || isSubmitting"
+                class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm"
+                [class.bg-blue-600]="canSubmit()"
+                [class.hover:bg-blue-700]="canSubmit()"
+                [class.text-white]="canSubmit()"
+                [class.bg-slate-200]="!canSubmit()"
+                [class.text-slate-400]="!canSubmit()"
+                [class.cursor-not-allowed]="!canSubmit()">
+                <!-- Submitting spinner -->
+                <ng-container *ngIf="isSubmitting">
+                  <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Creating Sale…
+                </ng-container>
+                <!-- Ready state -->
+                <ng-container *ngIf="!isSubmitting">
+                  <span class="material-icons text-sm">add_circle</span>
+                  {{ formConfig.submitLabel }}
+                </ng-container>
+              </button>
+
+              <!-- Cancel -->
+              <button
+                type="button"
+                (click)="cancel()"
+                class="w-full px-5 py-2.5 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
+                {{ formConfig.cancelLabel }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Items quick summary -->
+          <div *ngIf="itemsArray.length > 0 && subtotal > 0"
+               class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 px-5 py-3 border-b border-slate-200">
+              <h4 class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Selected Products</h4>
+            </div>
+            <ul class="divide-y divide-slate-100">
+              <li
+                *ngFor="let ctrl of itemsArray.controls; let i = index; trackBy: trackByIndex"
+                class="px-5 py-3 flex items-start justify-between gap-3 text-sm">
+                <div class="min-w-0">
+                  <p class="font-medium text-slate-800 truncate">
+                    {{ getProductNameForRow(ctrl.get('productId')?.value) }}
+                  </p>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    {{ ctrl.get('quantity')?.value || 0 }} × ${{ (+ctrl.get('unitPrice')?.value || 0).toFixed(2) }}
+                  </p>
+                </div>
+                <span class="text-sm font-semibold text-slate-900 shrink-0">${{ getItemLineTotal(i).toFixed(2) }}</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+        <!-- /right column -->
+
+      </div>
+    </form>
+  </div>
+</div>
